@@ -1,0 +1,93 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Client",
+      "presentation": {
+        "group": "Mod Development - Space Genesis",
+        "order": 0
+      },
+      "projectName": "Space Genesis",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@D:\\2.) Video Game Modding\\8.) Minecraft\\Space Genesis\\build\\moddev\\clientRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@D:\\2.) Video Game Modding\\8.) Minecraft\\Space Genesis\\build\\moddev\\clientRunVmArgs.txt",
+        "-Dfml.modFolders\u003dspacegenesis%%D:\\2.) Video Game Modding\\8.) Minecraft\\Space Genesis\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Data",
+      "presentation": {
+        "group": "Mod Development - Space Genesis",
+        "order": 1
+      },
+      "projectName": "Space Genesis",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@D:\\2.) Video Game Modding\\8.) Minecraft\\Space Genesis\\build\\moddev\\dataRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@D:\\2.) Video Game Modding\\8.) Minecraft\\Space Genesis\\build\\moddev\\dataRunVmArgs.txt",
+        "-Dfml.modFolders\u003dspacegenesis%%D:\\2.) Video Game Modding\\8.) Minecraft\\Space Genesis\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "GameTestServer",
+      "presentation": {
+        "group": "Mod Development - Space Genesis",
+        "order": 2
+      },
+      "projectName": "Space Genesis",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@D:\\2.) Video Game Modding\\8.) Minecraft\\Space Genesis\\build\\moddev\\gameTestServerRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@D:\\2.) Video Game Modding\\8.) Minecraft\\Space Genesis\\build\\moddev\\gameTestServerRunVmArgs.txt",
+        "-Dfml.modFolders\u003dspacegenesis%%D:\\2.) Video Game Modding\\8.) Minecraft\\Space Genesis\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Server",
+      "presentation": {
+        "group": "Mod Development - Space Genesis",
+        "order": 3
+      },
+      "projectName": "Space Genesis",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@D:\\2.) Video Game Modding\\8.) Minecraft\\Space Genesis\\build\\moddev\\serverRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@D:\\2.) Video Game Modding\\8.) Minecraft\\Space Genesis\\build\\moddev\\serverRunVmArgs.txt",
+        "-Dfml.modFolders\u003dspacegenesis%%D:\\2.) Video Game Modding\\8.) Minecraft\\Space Genesis\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    }
+  ]
+}

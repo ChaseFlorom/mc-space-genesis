@@ -1,0 +1,10 @@
+{
+    "type": "spacegenesis:asteroid",
+    "generator": {
+        "type": "spacegenesis:asteroid",
+        "biome_source": {
+            "type": "minecraft:fixed",
+            "biome": "minecraft:plains"
+        }
+    }
+} 
