@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.Mth;
 
 public class AsteroidChunkGenerator extends ChunkGenerator {
     public static final MapCodec<AsteroidChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(instance ->
@@ -45,17 +47,46 @@ public class AsteroidChunkGenerator extends ChunkGenerator {
 
     @Override
     public void buildSurface(WorldGenRegion region, StructureManager structureManager, RandomState random, ChunkAccess chunk) {
+        RandomSource randomSource = RandomSource.create(region.getSeed());
+        int chunkX = chunk.getPos().x;
+        int chunkZ = chunk.getPos().z;
+
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
+                // Generate height using simplex noise
+                double noise = generateNoise(chunkX * 16 + x, chunkZ * 16 + z, randomSource);
+                int height = (int) (noise * 20) + 64; // Base height of 64, with ±20 block variation
+
                 for (int y = region.getMinBuildHeight(); y < region.getMaxBuildHeight(); y++) {
-                    if (y < 64) {
-                        chunk.setBlockState(new BlockPos(x, y, z), Blocks.STONE.defaultBlockState(), false);
+                    BlockPos pos = new BlockPos(x, y, z);
+                    if (y < height) {
+                        chunk.setBlockState(pos, Blocks.STONE.defaultBlockState(), false);
                     } else {
-                        chunk.setBlockState(new BlockPos(x, y, z), Blocks.AIR.defaultBlockState(), false);
+                        chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                     }
                 }
             }
         }
+    }
+
+    private double generateNoise(int x, int z, RandomSource random) {
+        // Simple simplex-like noise function
+        double scale = 0.01;
+        double nx = x * scale;
+        double nz = z * scale;
+        
+        // Multiple octaves of noise for more natural terrain
+        double value = 0;
+        double amplitude = 1.0;
+        double frequency = 1.0;
+        
+        for (int i = 0; i < 4; i++) {
+            value += amplitude * (Mth.sin((float)(nx * frequency)) * Mth.cos((float)(nz * frequency)));
+            amplitude *= 0.5;
+            frequency *= 2.0;
+        }
+        
+        return (value + 1.0) * 0.5; // Normalize to 0-1
     }
 
     @Override

@@ -8,5 +8,12 @@
   "natural": false,
   "coordinate_scale": 1.0,
   "fixed_time": 6000,
-  "cloud_level": 1000.0
+  "cloud_level": 1000.0,
+  "generator": {
+    "type": "spacegenesis:asteroid",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "spacegenesis:asteroid"
+    }
+  }
 } 
