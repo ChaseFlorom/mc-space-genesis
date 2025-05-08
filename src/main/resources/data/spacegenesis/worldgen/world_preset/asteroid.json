@@ -36,6 +36,16 @@
           "weirdness_noise": { "firstOctave": -2, "amplitudes": [1.0] }
         }
       }
+    },
+    "spacegenesis:space": {
+      "type": "spacegenesis:space",
+      "generator": {
+        "type": "spacegenesis:space",
+        "biome_source": {
+          "type": "minecraft:fixed",
+          "biome": "spacegenesis:space"
+        }
+      }
     }
   }
 } 

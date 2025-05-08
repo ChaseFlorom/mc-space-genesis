@@ -1,9 +1,7 @@
 package com.florodude.spacegenesis;
 
 import org.slf4j.Logger;
-
 import com.mojang.logging.LogUtils;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -61,6 +59,10 @@ import org.joml.Matrix4f;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.minecraft.client.Camera;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import com.florodude.spacegenesis.dimension.SpaceDimension;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import com.florodude.spacegenesis.dimension.SpaceChunkGenerator;
+import net.minecraft.world.entity.player.Player;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(SpaceGenesis.MODID)
@@ -77,7 +79,8 @@ public class SpaceGenesis
     // Create a Deferred Register to hold CreativeModeTabs which will all be registered under the "spacegenesis" namespace
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
     // Register the AsteroidChunkGenerator
-    public static final DeferredRegister<MapCodec<? extends ChunkGenerator>> CHUNK_GENERATORS = DeferredRegister.create(Registries.CHUNK_GENERATOR, MODID);
+    public static final DeferredRegister<MapCodec<? extends ChunkGenerator>> CHUNK_GENERATORS = 
+        DeferredRegister.create(Registries.CHUNK_GENERATOR, MODID);
 
     // Creates a new Block with the id "spacegenesis:example_block", combining the namespace and path
     public static final DeferredBlock<Block> EXAMPLE_BLOCK = BLOCKS.registerSimpleBlock("example_block", BlockBehaviour.Properties.of().mapColor(MapColor.STONE));
@@ -113,12 +116,11 @@ public class SpaceGenesis
         ITEMS.register(modEventBus);
         // Register the Deferred Register to the mod event bus so tabs get registered
         CREATIVE_MODE_TABS.register(modEventBus);
-        // Register the AsteroidChunkGenerator
+        // Register the SpaceChunkGenerator
+        CHUNK_GENERATORS.register("space", () -> SpaceChunkGenerator.CODEC);
         CHUNK_GENERATORS.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in.
-        // Note that this is necessary if and only if we want *this* class (SpaceGenesis) to respond directly to events.
-        // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
 
         // Register the item to a creative tab
@@ -155,19 +157,7 @@ public class SpaceGenesis
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event)
     {
-        // Do something when the server starts
-        LOGGER.info("HELLO from server starting");
-        event.getServer().getCommands().getDispatcher().register(
-            Commands.literal("dimension")
-                .requires(source -> source.hasPermission(0))
-                .executes(context -> {
-                    ServerPlayer player = context.getSource().getPlayerOrException();
-                    Level level = player.level();
-                    String dimensionName = level.dimension().location().toString();
-                    context.getSource().sendSuccess(() -> Component.literal("You are in dimension: " + dimensionName), false);
-                    return 1;
-                })
-        );
+        // Register the /asteroid command
         event.getServer().getCommands().getDispatcher().register(
             Commands.literal("asteroid")
                 // No permission required, everyone can use
@@ -181,6 +171,24 @@ public class SpaceGenesis
                     // Teleport to spawn or (0, 65, 0)
                     player.teleportTo(targetLevel, 0.5, 65, 0.5, player.getYRot(), player.getXRot());
                     context.getSource().sendSuccess(() -> Component.literal("Teleported to the Asteroid dimension!"), false);
+                    return 1;
+                })
+        );
+
+        // Register the /space command
+        event.getServer().getCommands().getDispatcher().register(
+            Commands.literal("space")
+                // No permission required, everyone can use
+                .executes(context -> {
+                    ServerPlayer player = context.getSource().getPlayerOrException();
+                    ServerLevel targetLevel = event.getServer().getLevel(SpaceDimension.SPACE_LEVEL);
+                    if (targetLevel == null) {
+                        context.getSource().sendFailure(Component.literal("Space dimension not found!"));
+                        return 0;
+                    }
+                    // Teleport to spawn or (0, 65, 0)
+                    player.teleportTo(targetLevel, 0.5, 65, 0.5, player.getYRot(), player.getXRot());
+                    context.getSource().sendSuccess(() -> Component.literal("Teleported to the Space dimension!"), false);
                     return 1;
                 })
         );
@@ -198,6 +206,8 @@ public class SpaceGenesis
         @SubscribeEvent
         public static void registerDimensionEffects(RegisterDimensionSpecialEffectsEvent event) {
             ResourceLocation asteroidEffect = ResourceLocation.parse("spacegenesis:asteroid");
+            ResourceLocation spaceEffect = ResourceLocation.parse("spacegenesis:space");
+            
             DimensionSpecialEffects customSky = new DimensionSpecialEffects(Float.NaN, false, DimensionSpecialEffects.SkyType.NONE, false, false) {
                 @Override
                 public boolean isFoggyAt(int x, int y) {
@@ -209,6 +219,7 @@ public class SpaceGenesis
                 }
             };
             event.register(asteroidEffect, customSky);
+            event.register(spaceEffect, customSky);
         }
     }
 
@@ -222,5 +233,26 @@ public class SpaceGenesis
                 player.teleportTo(asteroidLevel, 0.5, 100, 0.5, player.getYRot(), player.getXRot());
             }
         }
+
+        @SubscribeEvent
+        public static void onPlayerTick(PlayerTickEvent.Pre event) {
+            Player player = event.getEntity();
+            if (player.level().dimension().equals(SpaceDimension.SPACE_LEVEL)) {
+                // Apply floating mechanics similar to water
+                if (!player.isInWater()) {
+                    Vec3 motion = player.getDeltaMovement();
+                    // Apply more gradual deceleration in space
+                    player.setDeltaMovement(
+                        motion.x * 0.95,  // Less friction than before
+                        motion.y * 0.95,  // Allow more vertical movement
+                        motion.z * 0.95
+                    );
+                    
+                    // Cancel fall damage in space
+                    player.fallDistance = 0.0F;
+                }
+            }
+        }
     }
 }
+

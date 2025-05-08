@@ -1,0 +1,11 @@
+{
+  "type": "spacegenesis:space_dimension_type",
+  "generator": {
+    "type": "spacegenesis:space",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "spacegenesis:space"
+    },
+    "seed": 0
+  }
+} 

@@ -1,0 +1,19 @@
+{
+  "fog_color": [0.0, 0.0, 0.0],
+  "sky_color": [0.0, 0.0, 0.0],
+  "ambient_light": 1,
+  "has_skylight": false,
+  "has_ceiling": false,
+  "ultrawarm": false,
+  "natural": false,
+  "coordinate_scale": 1.0,
+  "fixed_time": 6000,
+  "cloud_level": 1000.0,
+  "generator": {
+    "type": "spacegenesis:space",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "spacegenesis:space"
+    }
+  }
+} 

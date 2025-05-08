@@ -1,0 +1,7 @@
+---
+description: Neoforge Class Needed
+globs: 
+alwaysApply: false
+---
+If you need to access a Neoforge class from the external library, you can view all of them in the base folder / CURSOR REFERENCE / neoforged / neoforge.
+

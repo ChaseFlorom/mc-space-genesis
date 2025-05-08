@@ -24,3 +24,6 @@ runs
 run-data
 
 repo
+
+# Ignore Cursor reference files
+CURSOR REFERENCE/
