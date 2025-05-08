@@ -60,6 +60,7 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import org.joml.Matrix4f;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.minecraft.client.Camera;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(SpaceGenesis.MODID)
@@ -208,6 +209,18 @@ public class SpaceGenesis
                 }
             };
             event.register(asteroidEffect, customSky);
+        }
+    }
+
+    @EventBusSubscriber(modid = MODID)
+    public static class ModCommonEvents {
+        @SubscribeEvent
+        public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+            if (!(event.getEntity() instanceof ServerPlayer player)) return;
+            ServerLevel asteroidLevel = player.server.getLevel(com.florodude.spacegenesis.dimension.AsteroidDimension.ASTEROID_LEVEL);
+            if (asteroidLevel != null && player.level().dimension() != com.florodude.spacegenesis.dimension.AsteroidDimension.ASTEROID_LEVEL) {
+                player.teleportTo(asteroidLevel, 0.5, 100, 0.5, player.getYRot(), player.getXRot());
+            }
         }
     }
 }

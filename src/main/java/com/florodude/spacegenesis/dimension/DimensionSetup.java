@@ -26,6 +26,15 @@ public class DimensionSetup {
             // Set spawn point in the asteroid dimension
             if (event.getLevel() instanceof ServerLevel serverLevel) {
                 serverLevel.setDefaultSpawnPos(new BlockPos(0, 100, 0), 0.0F);
+                // Clear a 5x5x5 area around spawn to air
+                for (int dx = -2; dx <= 2; dx++) {
+                    for (int dy = -2; dy <= 2; dy++) {
+                        for (int dz = -2; dz <= 2; dz++) {
+                            BlockPos clearPos = new BlockPos(dx, 100 + dy, dz);
+                            serverLevel.setBlockAndUpdate(clearPos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+                        }
+                    }
+                }
             }
         }
     }

@@ -24,12 +24,18 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Mth;
+import net.minecraft.core.Holder;
+import net.minecraft.world.level.biome.Biome;
+import java.util.ArrayList;
 
 public class AsteroidChunkGenerator extends ChunkGenerator {
     public static final MapCodec<AsteroidChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(instance ->
         instance.group(
             BiomeSource.CODEC.fieldOf("biome_source").forGetter(gen -> gen.biomeSource)
         ).apply(instance, AsteroidChunkGenerator::new));
+
+    // Use a static seed for seamless base terrain noise
+    private static final long BASE_TERRAIN_SEED = 12345L;
 
     public AsteroidChunkGenerator(BiomeSource biomeSource) {
         super(biomeSource);
@@ -51,16 +57,54 @@ public class AsteroidChunkGenerator extends ChunkGenerator {
         int chunkX = chunk.getPos().x;
         int chunkZ = chunk.getPos().z;
 
+        // Precompute craters for this chunk and a margin (to allow overlap)
+        List<Crater> craters = new ArrayList<>();
+        for (int cx = chunkX - 1; cx <= chunkX + 1; cx++) {
+            for (int cz = chunkZ - 1; cz <= chunkZ + 1; cz++) {
+                long seed = (cx * 341873128712L + cz * 132897987541L + region.getSeed());
+                RandomSource craterRand = RandomSource.create(seed);
+                for (int i = 0; i < 2; i++) { // 2 craters per chunk on average
+                    if (craterRand.nextDouble() < 0.02) {
+                        int centerX = cx * 16 + craterRand.nextInt(16);
+                        int centerZ = cz * 16 + craterRand.nextInt(16);
+                        double radius = 6.0 + craterRand.nextDouble() * 10.0;
+                        int depth = 4 + craterRand.nextInt(9);
+                        craters.add(new Crater(centerX, centerZ, radius, depth));
+                    }
+                }
+            }
+        }
+
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                // Generate height using simplex noise
-                double noise = generateNoise(chunkX * 16 + x, chunkZ * 16 + z, randomSource);
-                int height = (int) (noise * 20) + 64; // Base height of 64, with ±20 block variation
+                int worldX = chunkX * 16 + x;
+                int worldZ = chunkZ * 16 + z;
+                // Generate base height using seamless noise
+                double noise = generateNoise(worldX, worldZ);
+                int baseHeight = Math.round((float)(noise * 20 + 64));
 
+                int height = baseHeight;
+                boolean isCraterFloor = false;
+                for (Crater crater : craters) {
+                    double dx = worldX - crater.centerX;
+                    double dz = worldZ - crater.centerZ;
+                    double dist = Math.sqrt(dx * dx + dz * dz);
+                    if (dist < crater.radius) {
+                        double bowl = Math.cos((dist / crater.radius) * Math.PI) * 0.5 + 0.5;
+                        int depression = (int)(bowl * crater.depth);
+                        int newHeight = baseHeight - depression;
+                        if (newHeight < height) {
+                            height = newHeight;
+                            if (depression > 0) isCraterFloor = true;
+                        }
+                    }
+                }
                 for (int y = region.getMinBuildHeight(); y < region.getMaxBuildHeight(); y++) {
                     BlockPos pos = new BlockPos(x, y, z);
                     if (y < height) {
                         chunk.setBlockState(pos, Blocks.STONE.defaultBlockState(), false);
+                    } else if (isCraterFloor && y == height) {
+                        chunk.setBlockState(pos, Blocks.ICE.defaultBlockState(), false);
                     } else {
                         chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                     }
@@ -69,24 +113,20 @@ public class AsteroidChunkGenerator extends ChunkGenerator {
         }
     }
 
-    private double generateNoise(int x, int z, RandomSource random) {
-        // Simple simplex-like noise function
+    // Deterministic, seamless noise for base terrain
+    private double generateNoise(int x, int z) {
         double scale = 0.01;
-        double nx = x * scale;
-        double nz = z * scale;
-        
-        // Multiple octaves of noise for more natural terrain
+        double nx = x * scale + BASE_TERRAIN_SEED;
+        double nz = z * scale + BASE_TERRAIN_SEED;
         double value = 0;
         double amplitude = 1.0;
         double frequency = 1.0;
-        
         for (int i = 0; i < 4; i++) {
             value += amplitude * (Mth.sin((float)(nx * frequency)) * Mth.cos((float)(nz * frequency)));
             amplitude *= 0.5;
             frequency *= 2.0;
         }
-        
-        return (value + 1.0) * 0.5; // Normalize to 0-1
+        return (value + 1.0) * 0.5;
     }
 
     @Override
@@ -127,5 +167,17 @@ public class AsteroidChunkGenerator extends ChunkGenerator {
     @Override
     public void addDebugScreenInfo(List<String> info, RandomState random, BlockPos pos) {
         // Optionally add debug info here
+    }
+
+    // Crater class for storing properties
+    private static class Crater {
+        public final int centerX, centerZ, depth;
+        public final double radius;
+        public Crater(int centerX, int centerZ, double radius, int depth) {
+            this.centerX = centerX;
+            this.centerZ = centerZ;
+            this.radius = radius;
+            this.depth = depth;
+        }
     }
 } 
