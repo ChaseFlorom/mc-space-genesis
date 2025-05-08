@@ -63,6 +63,7 @@ import com.florodude.spacegenesis.dimension.SpaceDimension;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import com.florodude.spacegenesis.dimension.SpaceChunkGenerator;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.BlockPos;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(SpaceGenesis.MODID)
@@ -187,7 +188,11 @@ public class SpaceGenesis
                         return 0;
                     }
                     // Teleport to spawn or (0, 65, 0)
-                    player.teleportTo(targetLevel, 0.5, 65, 0.5, player.getYRot(), player.getXRot());
+                    double x = 0.5, y = 65, z = 0.5;
+                    player.teleportTo(targetLevel, x, y, z, player.getYRot(), player.getXRot());
+                    // Place a stone block below the player for testing
+                    BlockPos below = BlockPos.containing(x, y - 1, z);
+                    targetLevel.setBlockAndUpdate(below, Blocks.STONE.defaultBlockState());
                     context.getSource().sendSuccess(() -> Component.literal("Teleported to the Space dimension!"), false);
                     return 1;
                 })
@@ -241,13 +246,22 @@ public class SpaceGenesis
                 // Apply floating mechanics similar to water
                 if (!player.isInWater()) {
                     Vec3 motion = player.getDeltaMovement();
-                    // Apply more gradual deceleration in space
-                    player.setDeltaMovement(
-                        motion.x * 0.95,  // Less friction than before
-                        motion.y * 0.95,  // Allow more vertical movement
-                        motion.z * 0.95
-                    );
-                    
+                    boolean isJumping = false;
+                    // Only check input on the client side
+                    if (player.level().isClientSide && player instanceof net.minecraft.client.player.LocalPlayer clientPlayer) {
+                        isJumping = clientPlayer.input != null && clientPlayer.input.jumping;
+                    }
+                    if (isJumping) {
+                        // Simulate underwater upward movement
+                        player.setDeltaMovement(motion.x, 0.15, motion.z);
+                    } else {
+                        // Apply more gradual deceleration in space and slow falling
+                        player.setDeltaMovement(
+                            motion.x * 0.95,
+                            Math.max(motion.y * 0.95, -0.05), // Slow fall, never too fast down
+                            motion.z * 0.95
+                        );
+                    }
                     // Cancel fall damage in space
                     player.fallDistance = 0.0F;
                 }
