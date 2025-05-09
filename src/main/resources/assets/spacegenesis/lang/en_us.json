@@ -3,5 +3,6 @@
   "block.spacegenesis.example_block": "Example Block",
   "item.spacegenesis.example_item": "Example Item",
   "block.spacegenesis.mineral_deposit": "Mineral Deposit",
-  "item.spacegenesis.mineral_deposit": "Mineral Deposit"
+  "item.spacegenesis.mineral_deposit": "Mineral Deposit",
+  "item.spacegenesis.flint_scraper": "Flint Scraper"
 }

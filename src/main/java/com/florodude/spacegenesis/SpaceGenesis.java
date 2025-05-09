@@ -65,6 +65,8 @@ import com.florodude.spacegenesis.dimension.SpaceChunkGenerator;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.SoundType;
+import com.florodude.spacegenesis.item.CustomItems;
+import com.florodude.spacegenesis.block.CustomBlocks;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(SpaceGenesis.MODID)
@@ -101,6 +103,7 @@ public class SpaceGenesis
             .displayItems((parameters, output) -> {
                 output.accept(EXAMPLE_ITEM.get());
                 output.accept(com.florodude.spacegenesis.block.CustomBlocks.MINERAL_DEPOSIT_ITEM.get());
+                output.accept(com.florodude.spacegenesis.item.CustomItems.FLINT_SCRAPER.get());
             }).build());
 
     // Register the AsteroidChunkGenerator
@@ -115,6 +118,7 @@ public class SpaceGenesis
     {
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::clientSetup);
 
         // Register the Deferred Register to the mod event bus so blocks get registered
         BLOCKS.register(modEventBus);
@@ -137,7 +141,9 @@ public class SpaceGenesis
         // Initialize dimension setup
         DimensionSetup.init(modEventBus);
 
-        com.florodude.spacegenesis.block.CustomBlocks.registerToBus(modEventBus);
+        // Register items and blocks
+        CustomItems.registerToBus(modEventBus);
+        CustomBlocks.registerToBus(modEventBus);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
@@ -151,6 +157,11 @@ public class SpaceGenesis
         LOGGER.info(Config.magicNumberIntroduction + Config.magicNumber);
 
         Config.items.forEach((item) -> LOGGER.info("ITEM >> {}", item.toString()));
+    }
+
+    private void clientSetup(final FMLClientSetupEvent event) {
+        LOGGER.info("HELLO FROM CLIENT SETUP");
+        LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
     }
 
     // Add the example block item to the building blocks tab

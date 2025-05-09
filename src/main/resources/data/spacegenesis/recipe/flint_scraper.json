@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "F": { "item": "minecraft:flint" }
+  },
+  "pattern": [
+    "FF",
+    "F "
+  ],
+  "result": {
+    "count": 1,
+    "id": "spacegenesis:flint_scraper"
+  }
+} 

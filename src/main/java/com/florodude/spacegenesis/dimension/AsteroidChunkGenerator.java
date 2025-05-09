@@ -27,6 +27,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import java.util.ArrayList;
+import com.florodude.spacegenesis.block.CustomBlocks;
 
 public class AsteroidChunkGenerator extends ChunkGenerator {
     public static final MapCodec<AsteroidChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(instance ->
@@ -67,9 +68,12 @@ public class AsteroidChunkGenerator extends ChunkGenerator {
                     if (craterRand.nextDouble() < 0.02) {
                         int centerX = cx * 16 + craterRand.nextInt(16);
                         int centerZ = cz * 16 + craterRand.nextInt(16);
-                        double radius = 6.0 + craterRand.nextDouble() * 10.0;
+                        // Make max radius a few blocks bigger
+                        double radius = 6.0 + craterRand.nextDouble() * 14.0; // was 10.0
                         int depth = 4 + craterRand.nextInt(9);
-                        craters.add(new Crater(centerX, centerZ, radius, depth));
+                        // Randomly choose crater type: true = ice, false = stone
+                        boolean isIce = craterRand.nextDouble() < 0.5;
+                        craters.add(new Crater(centerX, centerZ, radius, depth, isIce));
                     }
                 }
             }
@@ -85,6 +89,7 @@ public class AsteroidChunkGenerator extends ChunkGenerator {
 
                 int height = baseHeight;
                 boolean isCraterFloor = false;
+                Crater floorCrater = null;
                 for (Crater crater : craters) {
                     double dx = worldX - crater.centerX;
                     double dz = worldZ - crater.centerZ;
@@ -95,7 +100,10 @@ public class AsteroidChunkGenerator extends ChunkGenerator {
                         int newHeight = baseHeight - depression;
                         if (newHeight < height) {
                             height = newHeight;
-                            if (depression > 0) isCraterFloor = true;
+                            if (depression > 0) {
+                                isCraterFloor = true;
+                                floorCrater = crater;
+                            }
                         }
                     }
                 }
@@ -104,7 +112,27 @@ public class AsteroidChunkGenerator extends ChunkGenerator {
                     if (y < height) {
                         chunk.setBlockState(pos, Blocks.STONE.defaultBlockState(), false);
                     } else if (isCraterFloor && y == height) {
-                        chunk.setBlockState(pos, Blocks.ICE.defaultBlockState(), false);
+                        if (floorCrater != null && !floorCrater.isIce) {
+                            // Stone crater floor
+                            RandomSource depositRand = RandomSource.create(worldX * 341873128712L + worldZ * 132897987541L + region.getSeed());
+                            if (depositRand.nextDouble() < 0.1) { // 10% chance for gravel
+                                chunk.setBlockState(pos, Blocks.GRAVEL.defaultBlockState(), false);
+                            } else {
+                                chunk.setBlockState(pos, Blocks.STONE.defaultBlockState(), false);
+                            }
+                            // Place 0-1 mineral deposits at the bottom, randomly scattered
+                            if (depositRand.nextDouble() < 0.5) { // 50% chance of one deposit
+                                int dx = x + depositRand.nextInt(3) - 1;
+                                int dz = z + depositRand.nextInt(3) - 1;
+                                if (dx >= 0 && dx < 16 && dz >= 0 && dz < 16) {
+                                    BlockPos depositPos = new BlockPos(dx, y, dz);
+                                    chunk.setBlockState(depositPos, CustomBlocks.MINERAL_DEPOSIT_BLOCK.get().defaultBlockState(), false);
+                                }
+                            }
+                        } else {
+                            // Ice crater floor
+                            chunk.setBlockState(pos, Blocks.ICE.defaultBlockState(), false);
+                        }
                     } else {
                         chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                     }
@@ -166,18 +194,20 @@ public class AsteroidChunkGenerator extends ChunkGenerator {
 
     @Override
     public void addDebugScreenInfo(List<String> info, RandomState random, BlockPos pos) {
-        // Optionally add debug info here
+        //Come back to this later
     }
 
     // Crater class for storing properties
     private static class Crater {
         public final int centerX, centerZ, depth;
         public final double radius;
-        public Crater(int centerX, int centerZ, double radius, int depth) {
+        public final boolean isIce;
+        public Crater(int centerX, int centerZ, double radius, int depth, boolean isIce) {
             this.centerX = centerX;
             this.centerZ = centerZ;
             this.radius = radius;
             this.depth = depth;
+            this.isIce = isIce;
         }
     }
 } 
