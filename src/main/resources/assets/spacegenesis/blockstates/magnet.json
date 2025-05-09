@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "spacegenesis:block/magnet" },
+    "facing=south": { "model": "spacegenesis:block/magnet", "y": 180 },
+    "facing=west":  { "model": "spacegenesis:block/magnet", "y": 270 },
+    "facing=east":  { "model": "spacegenesis:block/magnet", "y": 90 }
+  }
+} 

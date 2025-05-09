@@ -67,6 +67,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.SoundType;
 import com.florodude.spacegenesis.item.CustomItems;
 import com.florodude.spacegenesis.block.CustomBlocks;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import com.florodude.spacegenesis.block.entity.ModBlockEntities;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(SpaceGenesis.MODID)
@@ -104,6 +107,7 @@ public class SpaceGenesis
                 output.accept(EXAMPLE_ITEM.get());
                 output.accept(com.florodude.spacegenesis.block.CustomBlocks.MINERAL_DEPOSIT_ITEM.get());
                 output.accept(com.florodude.spacegenesis.item.CustomItems.FLINT_SCRAPER.get());
+                output.accept(com.florodude.spacegenesis.block.CustomBlocks.MAGNET_ITEM.get());
             }).build());
 
     // Register the AsteroidChunkGenerator
@@ -144,6 +148,9 @@ public class SpaceGenesis
         // Register items and blocks
         CustomItems.registerToBus(modEventBus);
         CustomBlocks.registerToBus(modEventBus);
+
+        // Register the Magnet block entity
+        ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
@@ -162,6 +169,8 @@ public class SpaceGenesis
     private void clientSetup(final FMLClientSetupEvent event) {
         LOGGER.info("HELLO FROM CLIENT SETUP");
         LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+        // Register cutout render layer for Magnet block
+        ItemBlockRenderTypes.setRenderLayer(com.florodude.spacegenesis.block.CustomBlocks.MAGNET_BLOCK.get(), RenderType.cutout());
     }
 
     // Add the example block item to the building blocks tab

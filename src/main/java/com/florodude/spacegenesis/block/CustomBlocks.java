@@ -12,6 +12,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.minecraft.core.registries.Registries;
 import com.florodude.spacegenesis.SpaceGenesis;
 import com.florodude.spacegenesis.block.MineralDepositBlock;
+import com.florodude.spacegenesis.block.MagnetBlock;
 
 public class CustomBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(SpaceGenesis.MODID);
@@ -25,6 +26,17 @@ public class CustomBlocks {
                     .noOcclusion()
             ));
     public static final DeferredItem<BlockItem> MINERAL_DEPOSIT_ITEM = ITEMS.registerSimpleBlockItem("mineral_deposit", MINERAL_DEPOSIT_BLOCK);
+
+    public static final DeferredBlock<Block> MAGNET_BLOCK = BLOCKS.register("magnet",
+            () -> new MagnetBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(2.0F)
+                    .sound(SoundType.METAL)
+                    .isSuffocating((state, getter, pos) -> false)
+                    .isViewBlocking((state, getter, pos) -> false)
+                    .noOcclusion()
+            ));
+    public static final DeferredItem<BlockItem> MAGNET_ITEM = ITEMS.registerSimpleBlockItem("magnet", MAGNET_BLOCK);
 
     public static void registerToBus(net.neoforged.bus.api.IEventBus modEventBus) {
         BLOCKS.register(modEventBus);
