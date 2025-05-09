@@ -1,7 +1,8 @@
 {
   "parent": "block/block",
   "textures": {
-    "MagnetTexture": "spacegenesis:block/magnet"
+    "MagnetTexture": "spacegenesis:block/magnet",
+    "particle": "spacegenesis:block/magnet"
   },
   "elements": [
     {"from":[2,0,2],"to":[15,2,14],"rotation":{"angle":0,"axis":"y","origin":[2,0,2]},"faces":{"north":{"uv":[6.5,4.5,9.75,5],"texture":"#MagnetTexture"},"east":{"uv":[7.25,7.5,10.25,8],"texture":"#MagnetTexture"},"south":{"uv":[6.5,5,9.75,5.5],"texture":"#MagnetTexture"},"west":{"uv":[2,8,5,8.5],"texture":"#MagnetTexture"},"up":{"uv":[3.25,3,0,0],"texture":"#MagnetTexture"},"down":{"uv":[3.25,3,0,6],"texture":"#MagnetTexture"}},"name":"Cube"},
