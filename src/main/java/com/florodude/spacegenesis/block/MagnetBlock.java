@@ -17,6 +17,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.Level;
 
 public class MagnetBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
@@ -60,5 +63,14 @@ public class MagnetBlock extends BaseEntityBlock {
     @Override
     public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
+    }
+
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return type == com.florodude.spacegenesis.block.entity.ModBlockEntities.MAGNET_BE.value() ? (lvl, pos, st, be) -> {
+            if (be instanceof com.florodude.spacegenesis.block.entity.MagnetBlockEntity magnet) {
+                magnet.tick();
+            }
+        } : null;
     }
 } 
