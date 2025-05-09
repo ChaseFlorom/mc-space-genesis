@@ -64,6 +64,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import com.florodude.spacegenesis.dimension.SpaceChunkGenerator;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.SoundType;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(SpaceGenesis.MODID)
@@ -98,11 +99,15 @@ public class SpaceGenesis
             .withTabsBefore(CreativeModeTabs.COMBAT)
             .icon(() -> EXAMPLE_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
-                output.accept(EXAMPLE_ITEM.get()); // Add the example item to the tab. For your own tabs, this method is preferred over the event
+                output.accept(EXAMPLE_ITEM.get());
+                output.accept(com.florodude.spacegenesis.block.CustomBlocks.MINERAL_DEPOSIT_ITEM.get());
             }).build());
 
     // Register the AsteroidChunkGenerator
     public static final net.neoforged.neoforge.registries.DeferredHolder<MapCodec<? extends ChunkGenerator>, MapCodec<AsteroidChunkGenerator>> ASTEROID_CHUNK_GENERATOR = CHUNK_GENERATORS.register("asteroid", () -> AsteroidChunkGenerator.CODEC);
+
+    // Register the SpaceChunkGenerator
+    public static final DeferredHolder<MapCodec<? extends ChunkGenerator>, MapCodec<SpaceChunkGenerator>> SPACE_CHUNK_GENERATOR = CHUNK_GENERATORS.register("space", () -> SpaceChunkGenerator.CODEC);
 
     // The constructor for the mod class is the first code that is run when your mod is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
@@ -118,7 +123,6 @@ public class SpaceGenesis
         // Register the Deferred Register to the mod event bus so tabs get registered
         CREATIVE_MODE_TABS.register(modEventBus);
         // Register the SpaceChunkGenerator
-        CHUNK_GENERATORS.register("space", () -> SpaceChunkGenerator.CODEC);
         CHUNK_GENERATORS.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in.
@@ -132,6 +136,8 @@ public class SpaceGenesis
 
         // Initialize dimension setup
         DimensionSetup.init(modEventBus);
+
+        com.florodude.spacegenesis.block.CustomBlocks.registerToBus(modEventBus);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
