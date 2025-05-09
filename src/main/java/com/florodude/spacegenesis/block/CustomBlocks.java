@@ -11,13 +11,14 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.minecraft.core.registries.Registries;
 import com.florodude.spacegenesis.SpaceGenesis;
+import com.florodude.spacegenesis.block.MineralDepositBlock;
 
 public class CustomBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(SpaceGenesis.MODID);
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SpaceGenesis.MODID);
 
     public static final DeferredBlock<Block> MINERAL_DEPOSIT_BLOCK = BLOCKS.register("mineral_deposit",
-            () -> new Block(BlockBehaviour.Properties.of()
+            () -> new MineralDepositBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.STONE)
                     .strength(0.6F)
                     .sound(SoundType.GRAVEL)
